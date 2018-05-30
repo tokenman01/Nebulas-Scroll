@@ -145,7 +145,6 @@
       <div class="footer">
           联系作者: tokenman@126.com
       </div>
-
   </div>
 
 
@@ -249,6 +248,7 @@
       $("#view_button").click(function(){
         view();
       });
+
       function view(){
           var value="0";
           var callFunction = "view";
@@ -296,6 +296,9 @@
       intervalQuery = setInterval(function () {
           funcIntervalQuery();
       }, 5000);
+      setTimeout(function(){
+        alert("付款成功！已获取卷轴内容查看资格！请输入您的钱包地址后点击查看！");
+      },20000);
     });
 
 

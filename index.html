@@ -291,6 +291,10 @@
         intervalQuery = setInterval(function () {
             funcIntervalQuery("save");
         }, 5000);
+        setTimeout(function(){
+          alert("恭喜！您已成功封印卷轴，该卷轴代号为：" + key + "确认交易结束后点击跳转查看");
+          window.location.href="./show.html?key="+key;
+        },20000);
     });
 
 
