@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=0.5, maximum-scale=0.5, minimum-scale=0.5, user-scalable=no">
+    <meta name="x5-fullscreen" content="true">
+    <meta name="full-screen" content="yes">
+
+    <title>Magic Scroll</title>
+    <link rel="stylesheet" href="lib/bootstrap-4.0.0-dist/css/bootstrap.min.css">
+    <style>
+          .contenner{
+              background: url("img/bg.jpg");
+              height: 1200px;
+          }
+        .logo {
+            width: 100%;
+            height: 800px;
+            margin: auto;
+            background:url("img/logo.png") ;
+            background-repeat:no-repeat;repeat-x;repeat-y;
+            backgroun-size:100% 100%
+        }
+
+        .name {
+            text-align: center;
+            font-size: 66px;
+            text-shadow: 3px 5px grey, 1px 1px #333;
+        }
+
+        #write{
+          padding-top:120px;
+        }
+        .div {
+            width: 80%;
+            margin-top: 20px;
+            margin-right: auto;
+            margin-bottom: auto;
+            margin-left: auto;
+        }
+
+
+        .noExtension {
+            width: 60%;
+            height: 100px;
+            margin: auto;
+            font-size: 23px;
+        }
+
+        .input{
+            width: 100%;
+            height: 40px;
+            /* box-shadow: 3px 5px grey, 1px 1px #333; */
+        }
+
+        button{
+          width:100%;
+          /* box-shadow: 3px 5px grey, 1px 1px #333; */
+        }
+        .search{
+           padding-left: 80%
+        }
+        #search{
+          width:120px;
+          height:30px;
+        }
+
+        #save{
+          height: 50px;
+        }
+        .footer{
+          padding-left: 40%
+        }
+
+        @keyframes rotate {
+            0% { transform:rotateY(0deg);}
+            25% { transform:rotateY(180deg);}
+            50% { transform:rotateY(0deg);}
+            75% { transform:rotateY(180deg);}
+            100% { transform:rotateY(0deg);}
+        }
+
+        .hide{
+            display: none;
+        }
+
+        #show_create,#show_open{
+          margin-top: 5px;
+          width:100%;
+          height: 50px;
+          display: none;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="contenner">
+    <div>
+      <img src="img/logo_s.png" alt="">
+    </div>
+    <div class="name">MAGIC SCROLL星云卷轴</div>
+    <div class="logo">
+      <!-- <div class="name_cn">星云卷轴</div> -->
+        <div class="noExtension hide" id="noExtension">
+            NOTE: Please install <a target="_blank" href="https://github.com/ChengOrangeJu/WebExtensionWallet">WebExtensionWallet</a>  to use SUPER DICTIONARY
+        </div>
+        <div id = "write">
+          <div class="search">
+             <button id="search">创建新卷轴</button>
+          </div>
+        <div class="div"  >
+          卷轴编号：
+          <input class="input" placeholder="输入卷轴编号" required="required" id="content_key" type="text">
+          <button id="search_key">搜索</button>
+        </div>
+        <div class="div"  >
+          我创建的卷轴：
+          <input class="input" placeholder="输入您的钱包地址" required="required" id="input_create" type="text">
+          <button id="search_create">搜索</button>
+          <textarea  id="show_create"></textarea>
+        </div>
+        <div class="div"  >
+          我开启过的卷轴：
+          <input class="input" placeholder="输入您的钱包地址" required="required" id="input_open" type="text">
+          <button id="search_open">搜索</button>
+          <textarea id="show_open"></textarea>
+        </div>
+
+     </div>
+    </div>
+    <div class="footer">
+        联系作者: tokenman@126.com
+    </div>
+  </div>
+
+
+<script src=lib/jquery-3.3.1.min.js></script>
+<script src=lib/nebPay.js></script>
+<script src=lib/bootstrap-4.0.0-dist/js/bootstrap.min.js></script>
+<script src=lib/nebulas.js></script>
+<script>
+
+    "use strict";
+    //to check if the extension is installed
+    //if the extension is installed, var "webExtensionWallet" will be injected in to web page
+    if(typeof(webExtensionWallet) === "undefined"){
+        //alert ("Extension wallet is not installed, please install it first.")
+        $("#noExtension").removeClass("hide")
+    }else{
+        $("#search_value").attr("disabled",false)
+        $("#search").attr("disabled",false)
+    }
+
+    // var dappAddress = "n1kjdDEqtL85zPcGUiK6qL5AV6TqdGYgyBH";
+    var dappAddress = "n1nXrEAL6ofXf4SZBWGxWp3TjM6oigimVNB";
+
+    $("#search").click(function(){
+
+      window.location.href="./index.html";
+    });
+
+    $("#search_key").click(function(){
+      var key = $("#content_key").val();
+
+      if(!key||(key.length !==10 && key.length !==12)){
+        alert("key is invalid!");
+        return false;
+      }
+      window.location.href="./show.html?key="+key;
+    });
+
+    //here we use neb.js to call the "get" function to search from the Dictionary
+    var nebulas = require("nebulas"),
+        Account = nebulas.Account,
+        neb = new nebulas.Neb();
+        // neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"));
+        neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
+    var from = Account.NewAccount().getAddressString();
+    var value = "0";
+    var nonce = "0"
+    var gas_price = "1000000"
+    var gas_limit = "2000000"
+
+    $("#search_create").click(function(){
+       searchKeys("create");
+    });
+    $("#search_open").click(function(){
+       searchKeys("open");
+    });
+    function searchKeys(action){
+      var from=$("#input_"+action).val();
+      if(!from){
+        alert("地址不能为空！");
+        return false;
+      }
+      var callFunction = action+"Keys";
+      var callArgs = "[\""+from+"\"]";
+      var contract = {
+          "function": callFunction,
+          "args": callArgs
+      };
+      neb.api.call(from,dappAddress,value,nonce,gas_price,gas_limit,contract).then(function (resp) {
+        var  result=JSON.parse(resp.result);
+          console.log(result);
+          $("#show_"+action).val(result);
+          $("#show_"+action).css("display","block");
+      }).catch(function (err) {
+          console.log("error:" + err.message);
+      });
+    }
+
+
+</script>
+</body>
+
+</html>

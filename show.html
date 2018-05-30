@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=0.5, maximum-scale=0.5, minimum-scale=0.5, user-scalable=no">
+    <meta name="x5-fullscreen" content="true">
+    <meta name="full-screen" content="yes">
+
+    <title>Magic Scroll</title>
+    <link rel="stylesheet" href="lib/bootstrap-4.0.0-dist/css/bootstrap.min.css">
+    <style>
+       .contenner{
+        background: url("img/bg.jpg");
+        height: 1200px;
+       }
+       .logo {
+           width: 100%;
+           height: 800px;
+           margin: auto;
+           background:url("img/show.png");
+            background-repeat:no-repeat;repeat-x;repeat-y;
+           backgroun-size:100% 100%;
+       }
+
+        .name {
+            text-align: center;
+            font-size: 66px;
+            text-shadow: 3px 5px grey, 1px 1px #333;
+        }
+
+
+        .div {
+            width: 80%;
+            margin-top: 20px;
+            margin-right: auto;
+            margin-bottom: auto;
+            margin-left: auto;
+        }
+
+        #div_1{
+            padding-top:120px;
+        }
+
+        .noExtension {
+            width: 60%;
+            height: 100px;
+            margin: auto;
+            font-size: 23px;
+        }
+        button{
+          width:100%;
+          /* box-shadow: 3px 5px grey, 1px 1px #333; */
+        }
+
+        .search{
+           padding-left: 70%
+        }
+        #search,#create{
+          width:120px;
+          height:30px;
+        }
+
+        @keyframes rotate {
+            0% { transform:rotateY(0deg);}
+            25% { transform:rotateY(180deg);}
+            50% { transform:rotateY(0deg);}
+            75% { transform:rotateY(180deg);}
+            100% { transform:rotateY(0deg);}
+        }
+
+        .result_success {
+            width: 60%;
+            margin: auto;
+            font-size: 22px
+        }
+
+        .result_faile{
+            width: 60%;
+            margin: auto;
+            font-size: 22px
+        }
+
+        .hide{
+            display: none;
+        }
+        #show_content{
+          margin-top: 5px;
+          width:100%;
+          height: 50px;
+          display: none;
+        }
+        #userAddr{
+          margin-bottom: 1px;
+          width:30%;
+        }
+
+		  .footer{
+          padding-left: 40%;
+        }
+
+    </style>
+</head>
+
+<body>
+  <div class="contenner">
+      <div>
+        <img src="img/logo_s.png" alt="">
+      </div>
+      <div class="name">MAGIC SCROLL星云卷轴</div>
+      <div class="logo">
+        <!-- <div class="name_cn">星云卷轴</div> -->
+          <div class="noExtension hide" id="noExtension">
+              NOTE: Please install <a target="_blank" href="https://github.com/ChengOrangeJu/WebExtensionWallet">WebExtensionWallet</a>  to use SUPER DICTIONARY
+          </div>
+          <div class="search" id ="div_1">
+             <button id="search">查询历史数据</button>
+             <button id="create">创建新的卷轴</button>
+          </div>
+          <div class = "div" >
+           <p >卷轴编号：<span id="key"></span></p><br/>
+           <p >卷轴名称：<span id="master"></span></p><br/>
+           <p >卷轴价格：<span id="price"></span>nas</p><br/>
+           <p >打开次数：<span id="times"></span></p><br/>
+         </div>
+         <div class="div" id="open_div">
+           <button id="open_button">付费获取卷轴开启资格</button>
+         </div>
+         <div class="div" id="view_div">
+           <div id="input_addr">查看人钱包地址：
+             <input class="input" placeholder="如已付费直接填入钱包地址即可再次查看" id="userAddr" required="required" id="content_create" type="text">
+           </div>
+           <button id="view_button">查看卷轴内容</button><br/>
+           <textarea id="show_content"></textarea>
+         </div>
+         <div class ="div">
+           <p >卷轴介绍：<span id="desc"></span></p><br/>
+         </div>
+         <div class="div" id="view_div">
+           <input type="text" size="30" id="url" value="" disabled>
+           <input type="button" value="复制链接分享卷轴" onClick="copyUrl()">
+         </div>
+      </div>
+      <div class="footer">
+          联系作者: tokenman@126.com
+      </div>
+
+  </div>
+
+
+<script src=lib/jquery-3.3.1.min.js></script>
+<script src=lib/nebPay.js></script>
+<script src=lib/bootstrap-4.0.0-dist/js/bootstrap.min.js></script>
+<script src=lib/nebulas.js></script>
+<script>
+
+    "use strict";
+    var key ="";
+    var url ="";
+    (function ($) {
+        $.getUrlParam = function (name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+       key = $.getUrlParam("key");
+
+       url =window.location.href;
+
+       $("#url").val(url);
+       if(!key||(key.length !==10 && key.length !==12)){
+         alert("卷轴编码为空或格式非法");
+         return false;
+       }
+
+       if(key.length === 12){
+         $("#open_div").hide();
+         $("#input_addr").hide();
+       }
+
+    })(jQuery);
+
+    //to check if the extension is installed
+    //if the extension is installed, var "webExtensionWallet" will be injected in to web page
+    if(typeof(webExtensionWallet) === "undefined"){
+        //alert ("Extension wallet is not installed, please install it first.")
+        $("#noExtension").removeClass("hide")
+    }else{
+        $("#search_value").attr("disabled",false)
+    }
+
+    // var dappAddress = "n1kjdDEqtL85zPcGUiK6qL5AV6TqdGYgyBH";
+    var dappAddress = "n1nXrEAL6ofXf4SZBWGxWp3TjM6oigimVNB";
+
+    //here we use neb.js to call the "get" function to search from the Dictionary
+    var nebulas = require("nebulas"),
+        Account = nebulas.Account,
+        neb = new nebulas.Neb();
+    // neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"));
+    neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
+    var from = Account.NewAccount().getAddressString();
+    var value = "0";
+    var nonce = "0"
+    var gas_price = "1000000"
+    var gas_limit = "2000000"
+    var callFunction = "show";
+    var callArgs = "[\""+ key +"\"]";
+    var contract = {
+        "function": callFunction,
+        "args": callArgs
+    };
+    var userAddr = Account.NewAccount().getAddressString();;
+
+    window.onload = show();
+    function show(){
+      neb.api.call(from,dappAddress,value,nonce,gas_price,gas_limit,contract).then(function (resp) {
+          console.log(resp);
+           setData(resp);
+      }).catch(function (err) {
+          console.log("error:" + err);
+      });
+    }
+
+    function setData(resp){
+      var result = resp.result;   ////resp is an object, resp.result is a JSON string
+      console.log("return of rpc call: " + JSON.stringify(result));
+      if (result === 'null'){
+          //获取失败提示刷新 ，点击刷新按钮  // TODO:
+      } else{
+          try{
+              result = JSON.parse(result)
+              $("#key").text(key);
+              if(key.length ===12){
+                  $("#times").text("不限次数");
+              }else{
+                  $("#times").text(result.vtimes+"/"+result.times);
+              }
+              $("#master").text(result.master);
+              $("#price").text(result.price);
+              $("#desc").text(result.desc);
+              value =result.price;
+          }catch (err){
+            alert(result);  //result is the error message
+          }
+
+    }
+  }
+      $("#view_button").click(function(){
+        view();
+      });
+      function view(){
+          var value="0";
+          var callFunction = "view";
+          if(key.length === 10){
+            var userAddr = $("#userAddr").val();
+            if(!userAddr){
+              alert("查看人钱包地址不能为空，请确定已付费");
+              return false;
+            }
+          }
+
+          var callArgs = "[\""+ key +"\",\""+ userAddr+"\"]";
+          var contract = {
+              "function": callFunction,
+              "args": callArgs
+          };
+          neb.api.call(from,dappAddress,value,nonce,gas_price,gas_limit,contract).then(function (resp) {
+            try{
+              var  result=JSON.parse(resp.result);
+                console.log(result);
+                $("#show_content").val(result.content);
+                $("#show_content").css("display","block");
+            }catch (err){
+                alert(resp.result); //result is the error message
+            }
+          }).catch(function (err) {
+              // console.log( err);
+          });
+        }
+     //给合约增加随机加密参数
+     var NebPay = require("nebpay");     //https://github.com/nebulasio/nebPay
+     var nebPay = new NebPay();
+     var serialNumber;
+    $("#open_button").click(function(){
+      var to = dappAddress;
+      // var value = "0";
+      var callFunction = "open"
+      var callArgs = "[\""+ key +"\"]"
+      serialNumber = nebPay.call(to, value, callFunction, callArgs, {    //使用nebpay的call接口去调用合约,
+          listener: function (resp) {
+                  console.log("response of push: " + JSON.stringify(resp));
+              },       //设置listener, 处理交易返回信息
+      });
+
+      intervalQuery = setInterval(function () {
+          funcIntervalQuery();
+      }, 5000);
+    });
+
+
+
+    var intervalQuery;
+    function funcIntervalQuery() {
+        nebPay.queryPayInfo(serialNumber)   //search transaction result from server (result upload to server by app)
+            .then(function (resp) {
+                console.log("tx result: " + resp)   //resp is a JSON string
+               var respObject = JSON.parse(resp);
+                if(respObject.code === 0){
+                     if(respObject.data.status == 1){
+                       alert("付款成功！已获取卷轴内容查看资格！");
+                       userAddr = respObject.data.from;
+                       $("#userAddr").val(userAddr);
+                       clearInterval(intervalQuery);
+                     }
+                }
+            })
+            .catch(function (err) {
+                console.log(err);
+            });
+    }
+
+    function cbPush(resp) {
+        console.log("response of push: " + JSON.stringify(resp));
+    }
+
+    function copyUrl()
+        {
+            var oInput = document.createElement('input');
+            oInput.value = url;
+            document.body.appendChild(oInput);
+            oInput.select(); // 选择对象
+            document.execCommand("Copy"); // 执行浏览器复制命令
+            oInput.className = 'oInput';
+            oInput.style.display='none';
+            alert('复制成功！现在把卷轴分享给朋友来开启吧！');
+        }
+
+        $("#search").click(function(){
+          window.location.href="./search.html";
+        });
+        $("#create").click(function(){
+          window.location.href="./index.html";
+        });
+    </script>
+
+</script>
+</body>
+
+</html>
