@@ -82,25 +82,6 @@
             100% { transform:rotateY(0deg);}
         }
 
-
-        .result_success {
-            width: 60%;
-            margin: auto;
-            font-size: 22px
-        }
-
-        .result_faile{
-            width: 60%;
-            margin: auto;
-            font-size: 22px
-        }
-
-
-        .salt_p{
-            text-indent:1em;
-            font-size: 15px;
-        }
-
         .hide{
             display: none;
         }
@@ -173,7 +154,8 @@
         $("#search").attr("disabled",false)
     }
 
-    var dappAddress = "n1q2ygpn5TzuPG7TXowzj1wqNV5qqXfCSCT";
+    // var dappAddress = "n1kjdDEqtL85zPcGUiK6qL5AV6TqdGYgyBH";
+    var dappAddress = "n1nXrEAL6ofXf4SZBWGxWp3TjM6oigimVNB";
 
     $("#search").click(function(){
 
@@ -194,7 +176,8 @@
     var nebulas = require("nebulas"),
         Account = nebulas.Account,
         neb = new nebulas.Neb();
-    neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"));
+        // neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"));
+        neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
     var from = Account.NewAccount().getAddressString();
     var value = "0";
     var nonce = "0"

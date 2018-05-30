@@ -13,11 +13,11 @@
     <style>
        .contenner{
         background: url("img/bg.jpg");
-        height: 1500px;
+        height: 1200px;
        }
        .logo {
            width: 100%;
-           height: 1000px;
+           height: 800px;
            margin: auto;
            background:url("img/show.png");
             background-repeat:no-repeat;repeat-x;repeat-y;
@@ -96,6 +96,10 @@
           width:30%;
         }
 
+		  .footer{
+          padding-left: 40%;
+        }
+
     </style>
 </head>
 
@@ -142,7 +146,7 @@
           联系作者: tokenman@126.com
       </div>
 
-      </div>
+  </div>
 
 
 <script src=lib/jquery-3.3.1.min.js></script>
@@ -186,13 +190,15 @@
         $("#search_value").attr("disabled",false)
     }
 
-    var dappAddress = "n1q2ygpn5TzuPG7TXowzj1wqNV5qqXfCSCT";
+    // var dappAddress = "n1kjdDEqtL85zPcGUiK6qL5AV6TqdGYgyBH";
+    var dappAddress = "n1nXrEAL6ofXf4SZBWGxWp3TjM6oigimVNB";
 
     //here we use neb.js to call the "get" function to search from the Dictionary
     var nebulas = require("nebulas"),
         Account = nebulas.Account,
         neb = new nebulas.Neb();
-    neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"));
+    // neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"));
+    neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
     var from = Account.NewAccount().getAddressString();
     var value = "0";
     var nonce = "0"

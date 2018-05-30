@@ -137,17 +137,22 @@
              <button id="search">查询历史数据</button>
           </div>
         <div class="div" id="main" >
-          魔盒内容：<span style="color:red;">*</span><br />
+          卷轴内容：<span style="color:red;">*</span><br />
           <input class="input" placeholder="内容不能为空" required="required" id="content" type="text">
         </div>
         <div class="div" id = "more_div">
-           价格<a href="#" title="价格设置为0次数默认无限次" style="color:red;">?</a>：<input class="more" id="price" placeholder="请输入获得开启卷轴资格的价格" type="text" >
+           价格<a href="#" title="价格设置为0次数默认无限次" style="color:red;">?</a>：<input class="more" id="price" placeholder="请输入开启卷轴的价格" type="text" >
            人数<a href="#" title="次数为0则内容无法打开" style="color:red;">?</a>：<input class="more" id="times" placeholder="请输入能开启卷轴的人数" type="text" >
            名称：<input class="more" placeholder="卷轴名称或标识" id="master" type="text"></br>
            简介：<input class="more" placeholder="卷轴简要介绍及其他" id="desc" type="text"></br>
        </div>
        <div class="div" id="save_div">
          <button id="save">生成卷轴</button>
+       </div>
+       <div class="div" >
+         说明：<br/>
+         您可以将内容加密地写入星云链，之后生成一个分享链接。如果您已设置付费那么他人需要付费开启后才能获取查看的资格，如还设置了开启人数则超过人数无法再付费获取资格。
+         星云链用来分享任何付费或免费的内容资源，如一条付费链接，一个资源的密码，一篇私密日记等等。
        </div>
        <div  class="div" id = "salt_div">
          <p class ="salt_p">加密参数随机生成并保存在链上，每次打开页面获取随机值，所以越多越安全，您也可以点击下面按钮以帮助合约生成并保存更多的加密参数，谢谢！</p>
@@ -180,13 +185,15 @@
         $("#search_value").attr("disabled",false)
     }
 
-    var dappAddress = "n1q2ygpn5TzuPG7TXowzj1wqNV5qqXfCSCT";
+    // var dappAddress = "n1kjdDEqtL85zPcGUiK6qL5AV6TqdGYgyBH";
+    var dappAddress = "n1nXrEAL6ofXf4SZBWGxWp3TjM6oigimVNB";
 
     //here we use neb.js to call the "get" function to search from the Dictionary
     var nebulas = require("nebulas"),
         Account = nebulas.Account,
         neb = new nebulas.Neb();
-    neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"));
+    // neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"));
+    neb.setRequest(new nebulas.HttpRequest("https://mainnet.nebulas.io"));
     var from = Account.NewAccount().getAddressString();
     var value = "0";
     var nonce = "0"
