@@ -196,9 +196,9 @@ MagicScroll.prototype = {
 			return rndSalt;
 		},
 
-    save: function (key,text,saltKey,price,times,desc,master) {
+       save: function (key,text,saltKey,price,times,desc,master) {
 
-        key = key.trim();
+                key = key.trim();
 				if(key.length !== 12 && key.length !== 10){
 					throw new Error("key invalid!");
 				}
@@ -207,9 +207,7 @@ MagicScroll.prototype = {
 					throw new Error("sorry, the key was occupied, please try again.");
 				}
 
-        scroll = new Scroll();
-
-				scroll.key = key;
+                scroll = new Scroll();
 
 				scroll.price = Number(price);
 				scroll.times = Number(times);
@@ -225,28 +223,28 @@ MagicScroll.prototype = {
 				}
 
 				scroll.saltKey = (String(saltKey)).trim();
-        var salt = this.salt.get(scroll.saltKey);
+                var salt = this.salt.get(scroll.saltKey);
 				if(!salt){
 					throw new Error("salt invalid!");
 				}
 
 				var tools = new Tools(salt);
 				var content = text.trim();; //解密content todo
-        content = tools.decrypt(content);
+                 content = tools.decrypt(content);
 
-        scroll.content = content;
-				scroll.desc = desc;
+                scroll.content = content;
+		 		scroll.desc = desc;
 				scroll.master = master;
 
-        if(content === ""){
-            throw new Error("empty content!");
-        }else if(content.length > 2100){
-            throw new Error("content exceed limit length");
-        }
-        var addr = Blockchain.transaction.from
+				if(content === ""){
+					throw new Error("empty content!");
+				}else if(content.length > 2100){
+					throw new Error("content exceed limit length");
+				}
+				var addr = Blockchain.transaction.from
 				scroll.from = addr;
 
-        this.repo.set(key, scroll);
+				this.repo.set(key, scroll);
 				// update userHistory
 				var userHistory = this.userRepo.get(addr);
 				if(!userHistory){
@@ -256,89 +254,89 @@ MagicScroll.prototype = {
 				this.userRepo.set(addr,userHistory);
 
 				return true;
-    },
-
-    show: function(key){//展示卷轴
-       var scroll = this.repo.get(key);
-       if(scroll){
-           delete scroll.content;
-					 delete scroll.from; //保密
-           return scroll;
-       }else{
-           throw new Error("scroll was not exist");
-       }
-    },
-
-		in_array: function(arr,v){
-			for(var i in arr){
-	  	if(arr[i] === v){
-				return true;
-	    	   }
-       }
-      return false;
 		},
 
-    open: function (key) {//打开卷轴
-        key = key.trim();
-        if ( key === "" ) {
-            throw new Error("empty key")
-        }
-        var scroll = this.repo.get(key);
-        if(!scroll){
-           throw new Error("scroll was not exist");
-        }
+		show: function(key){//展示卷轴
+			   var scroll = this.repo.get(key);
+			   if(scroll){
+				   delete scroll.content;
+				   delete scroll.from; //保密
+				   return scroll;
+			   }else{
+				   throw new Error("scroll was not exist");
+			   }
+			},
 
-        if(scroll.vtimes >= scroll.times){
-          throw new Error("visit times was exceeded!");
-        }
+		in_array: function(arr,v){
+				for(var i in arr){
+					if(arr[i] === v){
+							return true;
+						   }
+					   }
+		        return false;
+			},
 
-        if(key.length === 12){
-            return true;
-        }else if(key.length === 10){
-            //check history
-            var openAddr = Blockchain.transaction.from;
-            var userHistory = this.userRepo.get(openAddr);
-            if(userHistory && userHistory.openKeys.length >= 1){
-              if(this.in_array(userHistory.openKeys,key)){
-                return true;
-              }
-            }
+		open: function (key) {//打开卷轴
+			key = key.trim();
+			if ( key === "" ) {
+				throw new Error("empty key")
+			}
+			var scroll = this.repo.get(key);
+			if(!scroll){
+			   throw new Error("scroll was not exist");
+			}
 
-            //新支付处理
-            //check value
-            var value = Blockchain.transaction.value;
-            if(value >= scroll.price){
-                var actPay = value.mul(1 - this.servRate);
-                var servFee = value.sub(actPay);
-                var result1 = Blockchain.transfer(scroll.from, actPay);
-                var result2 = Blockchain.transfer(this.servAddr, servFee);
-                if(!result1 || !result2){
-                  throw new Error("Transfer failed");
-                }
-            }else{
-              throw new Error("value is not enough!")
-            }
-            // update userHistory
-            if(!userHistory){
-              userHistory =new UserHistory();
-            }
-            userHistory.openKeys.push(key);
-            this.userRepo.set(openAddr,userHistory);
-            //update scroll vtimes
-            scroll.vtimes++;
-            this.repo.set(key,scroll);
-            return true;
-        }
-    },
+			if(scroll.vtimes >= scroll.times){
+			  throw new Error("visit times was exceeded!");
+			}
+
+			if(key.length === 12){
+				return true;
+			}else if(key.length === 10){
+				//check history
+				var openAddr = Blockchain.transaction.from;
+				var userHistory = this.userRepo.get(openAddr);
+				if(userHistory && userHistory.openKeys.length >= 1){
+				  if(this.in_array(userHistory.openKeys,key)){
+					return true;
+				  }
+				}
+
+				//新支付处理
+				//check value
+				var value = Blockchain.transaction.value;
+				if(value >= scroll.price){
+					var actPay = value.mul(1 - this.servRate);
+					var servFee = value.sub(actPay);
+					var result1 = Blockchain.transfer(scroll.from, actPay);
+					var result2 = Blockchain.transfer(this.servAddr, servFee);
+					if(!result1 || !result2){
+					  throw new Error("Transfer failed");
+					}
+				}else{
+				  throw new Error("value is not enough!")
+				}
+				// update userHistory
+				if(!userHistory){
+				  userHistory =new UserHistory();
+				}
+				userHistory.openKeys.push(key);
+				this.userRepo.set(openAddr,userHistory);
+				//update scroll vtimes
+				scroll.vtimes++;
+				this.repo.set(key,scroll);
+				return true;
+			}
+		},
 
 		view: function(key, openAddr){
-      //已付款的可以继续看
+           //已付款的可以继续看
 			key = key.trim();
 			if ( key === "" ) {
 					throw new Error("empty key");
 			}
 
-	    var scroll = this.repo.get(key);
+	        var scroll = this.repo.get(key);
 			if(!scroll){
 				throw new Error("the scroll was not exist!");
 			}
@@ -358,7 +356,7 @@ MagicScroll.prototype = {
 			}
 
 		},
-
+       //获取创建和打开历史
 		createKeys: function(addr){
 			var userHistory = this.userRepo.get(addr);
 			if(!userHistory){
@@ -375,55 +373,6 @@ MagicScroll.prototype = {
 			}
 			var openKeys =	userHistory.openKeys;
 			return openKeys;
-		},
-
-		showTest:function(key){
-			var scroll = this.repo.get(key);
-			scroll.superman = this.servAddr;
-			scroll.superFee	= this.servFee;
-			return scroll;
-		},
-
-		transferTest: function(){
-			var value = Blockchain.transaction.value;
-			var result = Blockchain.transfer(this.servAddr, value);
-			return result;
-		},
-
-		testmul: function(){
-			var value = Blockchain.transaction.value;
-			var mul = value.mul(0.2);
-			return mul;
-		},
-		testmulti: function(){
-			var value = Blockchain.transaction.value;
-			var mul = value.multi(0.2);
-			return mul;
-		},
-		testmul2: function(){
-			var value = Blockchain.transaction.value;
-			var mul = value*(0.2);
-			return mul;
-		},
-
-		getTestSalt: function(saltKey){
-			var salt = this.salt.get(saltKey);
-			return salt;
-		},
-		testfrom: function(key){
-			var from = Blockchain.transaction.from;
-			this.salt.set(key,from);
-			return from;
-		},
-
-		getfrom: function(key){
-			var salt = this.salt.get(key);
-			return salt;
-		},
-
-		getUserHistory(openAddr){
-			var userHistory = this.userRepo.get(openAddr);
-			return userHistory;
 		},
 
 };
