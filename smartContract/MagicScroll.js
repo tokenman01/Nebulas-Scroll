@@ -196,9 +196,9 @@ MagicScroll.prototype = {
 			return rndSalt;
 		},
 
-       save: function (key,text,saltKey,price,times,desc,master) {
+    save: function (key,text,saltKey,price,times,desc,master) {
 
-                key = key.trim();
+        key = key.trim();
 				if(key.length !== 12 && key.length !== 10){
 					throw new Error("key invalid!");
 				}
@@ -207,17 +207,17 @@ MagicScroll.prototype = {
 					throw new Error("sorry, the key was occupied, please try again.");
 				}
 
-                scroll = new Scroll();
+        scroll = new Scroll();
 
-				scroll.price = Number(price);
+				var price = Number(price);
 				scroll.times = Number(times);
-				if(isNaN(scroll.price)){
+				if(isNaN(price)){
 					throw new Error("price format invalid!");
 				}
+				scroll.price = new BigNumber(price);
 				if(isNaN(scroll.times)){
 					throw new Error("times format invalid!");
 				}
-
 				if(scroll.price <= 0){ //免费不对次数作限制
 					scroll.times = 9999999999;
 				}
@@ -232,7 +232,7 @@ MagicScroll.prototype = {
 				var content = text.trim();; //解密content todo
                  content = tools.decrypt(content);
 
-                scroll.content = content;
+        scroll.content = content;
 		 		scroll.desc = desc;
 				scroll.master = master;
 
@@ -305,7 +305,8 @@ MagicScroll.prototype = {
 				//新支付处理
 				//check value
 				var value = Blockchain.transaction.value;
-				if(value >= scroll.price){
+				var price = scroll.price * 1000000000000000000;
+				if(value >= price){
 					var actPay = value.mul(1 - this.servRate);
 					var servFee = value.sub(actPay);
 					var result1 = Blockchain.transfer(scroll.from, actPay);
@@ -314,7 +315,7 @@ MagicScroll.prototype = {
 					  throw new Error("Transfer failed");
 					}
 				}else{
-				  throw new Error("value is not enough!")
+				  throw new Error("value is not enough!");
 				}
 				// update userHistory
 				if(!userHistory){
@@ -335,8 +336,7 @@ MagicScroll.prototype = {
 			if ( key === "" ) {
 					throw new Error("empty key");
 			}
-
-	        var scroll = this.repo.get(key);
+	    var scroll = this.repo.get(key);
 			if(!scroll){
 				throw new Error("the scroll was not exist!");
 			}
